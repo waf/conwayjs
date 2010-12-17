@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<title>Conway's Game of Life</title>
+		<link media="all" rel="stylesheet" href="style.css" type="text/css" />
+		<script type="text/javascript" src="GameOfLife.js"></script>
+		<script type="text/javascript" src="UserInterface.js"></script>
+		<script type="text/javascript">
+			//function object passed into GoL framework, uses Conway's rules
+			function ConwayRule(alive,neighbors) {
+				var AliveCount = 0;
+				for(var cellIndex in neighbors) {
+					if(neighbors[cellIndex]) {
+						AliveCount++;
+					}
+				}
+				return (alive && (AliveCount == 2 || AliveCount == 3)) || (!alive && AliveCount == 3);
+			}
+
+			// Initialize simulation, setup ui controls
+			function main() {
+
+				var canvas = document.getElementById("canvas");
+				var patternTray = document.getElementById("pattern_list");
+				var stepButton = document.getElementById("step");
+				var goButton = document.getElementById("go");
+				var stopButton = document.getElementById("stop");
+				var clearButton = document.getElementById("clear");
+				var sizeSelect = document.getElementById("cellcount");
+
+				var patternMgr = new PatternManager(patternTray);
+				var golSimulation = new Simulation(canvas, patternMgr, 40, ConwayRule);
+
+				stepButton.onclick = golSimulation.step;
+				clearButton.onclick = golSimulation.clear;
+				goButton.onclick = function() {
+					stepButton.disabled = true;
+					goButton.disabled = true;
+					stopButton.disabled = false;
+					golSimulation.loop();
+				}
+				stopButton.onclick = function() {
+					stopButton.disabled = true;
+					stepButton.disabled = false;
+					goButton.disabled = false;
+					golSimulation.stop();
+				}
+				stopButton.disabled = true;
+				sizeSelect.onchange = function() {
+					golSimulation.clear();
+					var size = this.options[this.selectedIndex].value;
+					golSimulation.resize(parseInt(size));
+				};
+			}
+
+			if(window.addEventListener)
+				window.addEventListener("load",main,false); //standard
+			else
+				window.attachEvent("onload",main); //IE
+		</script>
+	</head>
+	<body>
+		<h1>Conway's Game of Life</h1>
+		<div class="sidebar" id="tray">
+			<h2>Drag and Drop Patterns</h2>
+			<ul id="pattern_list">
+			</ul>
+		</div>
+		<div class="sidebar" id="about">
+			<h2>What's this?</h2>
+			<p>This is a "Conway's Game of Life" simulator. It&nbsp;demonstrates cellular automation.</p>
+			<p>To start, drag patterns from the left sidebar to the middle canvas, then click the start button. You can also create your own patterns by by clicking when the simulator is halted.
+			<p>You can find out more about Conway's Game of Life at <a href="http://www.wikipedia.org/wiki/Conway's_Game_of_Life" title="Conways Game of Life">Wikipedia</a>.</p>
+		</div>
+		<div>
+		<div id="canvas"></div>
+		<div id="controlPanel">
+			<input type="button" id="go" value="Start" />
+			<input type="button" id="stop" value="Halt" />
+			<input type="button" id="step" value="Step" />
+			<input type="button" id="clear" value="Clear" />
+			<select id="cellcount">
+				<option value="20">20x20</option>
+				<option value="40" selected="selected">40x40</option>
+				<option value="70">70x70 (small tiles)</option>
+				<option value="100">100x100 (small tiles)</option>
+			</select>
+		</div>
+	</div>
+	</body>
+</html>
